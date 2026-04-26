@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DarkWaterLabs | Windows License Portal</title>
+    <title>Anon 360| Cashcow</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -81,13 +81,13 @@
             <div class="mb-8 inline-flex p-6 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full shadow-[0_0_40px_rgba(37,99,235,0.4)]">
                 <i data-lucide="shield-check" class="w-12 h-12 text-white"></i>
             </div>
-            <h1 class="text-4xl font-black italic tracking-tighter mb-1 bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">DARKWATERLABS</h1>
-            <p class="text-zinc-500 mb-8 font-medium italic text-sm tracking-tight">Institutional Activation Hub</p>
+            <h1 class="text-4xl font-black italic tracking-tighter mb-1 bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">ANON360</h1>
+            <p class="text-zinc-500 mb-8 font-medium italic text-sm tracking-tight">Initialization </p>
             
             <div class="space-y-4">
                 <div id="email-form" class="space-y-4 text-left">
                     <div>
-                        <label class="text-[10px] font-black uppercase text-zinc-500 tracking-widest ml-1 mb-2 block">Student Email</label>
+                        <label class="text-[10px] font-black uppercase text-zinc-500 tracking-widest ml-1 mb-2 block">Email</label>
                         <input id="auth-email" type="email" placeholder="student@university.edu" class="w-full px-5 py-4 rounded-2xl text-sm transition-all">
                     </div>
                     <div>
@@ -128,7 +128,7 @@
                     <div class="bg-gradient-to-br from-blue-600 to-indigo-600 p-2 rounded-xl shadow-lg shadow-blue-500/20">
                         <i data-lucide="shield-check" class="text-white w-6 h-6"></i>
                     </div>
-                    <span class="text-2xl font-black tracking-tighter italic bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">DWL</span>
+                    <span class="text-2xl font-black tracking-tighter italic bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">A360</span>
                 </div>
                 
                 <div class="flex items-center gap-4">
@@ -152,10 +152,10 @@
         <main class="max-w-5xl mx-auto p-6 pt-12 pb-24 w-full">
             <nav class="flex gap-2 mb-12 bg-zinc-900/30 p-1.5 rounded-[1.5rem] border border-zinc-900 w-fit overflow-x-auto no-scrollbar">
                 <button onclick="switchTab('shop')" id="nav-shop" class="nav-btn flex items-center gap-3 px-8 py-3 rounded-2xl text-sm font-black transition-all tab-active">
-                    <i data-lucide="shopping-cart" class="w-4 h-4"></i> Store
+                    <i data-lucide="shopping-cart" class="w-4 h-4"></i> Shop
                 </button>
                 <button onclick="switchTab('keys')" id="nav-keys" class="nav-btn flex items-center gap-3 px-8 py-3 rounded-2xl text-sm font-black transition-all text-zinc-500 hover:text-white">
-                    <i data-lucide="key" class="w-4 h-4"></i> Licenses
+                    <i data-lucide="key" class="w-4 h-4"></i> Purchases
                 </button>
                 <button onclick="switchTab('deposit')" id="nav-deposit" class="nav-btn flex items-center gap-3 px-8 py-3 rounded-2xl text-sm font-black transition-all text-zinc-500 hover:text-white">
                     <i data-lucide="wallet" class="w-4 h-4"></i> Wallet
@@ -173,7 +173,7 @@
 
         <footer class="mt-auto max-w-5xl mx-auto p-12 text-center text-zinc-700 border-t border-zinc-900/50 w-full">
             <div class="w-16 h-1 bg-zinc-900 mx-auto mb-10 rounded-full"></div>
-            <p class="font-black text-[10px] uppercase tracking-[0.4em] mb-4">DarkWaterLabs Ecosystem v3.2</p>
+            <p class="font-black text-[10px] uppercase tracking-[0.4em] mb-4">anonymous360</p>
         </footer>
     </div>
 
@@ -207,10 +207,10 @@
         let authMode = 'login'; 
 
         const PRODUCTS = [
-          { id: 'win10pro', name: 'Windows 10 Pro', price: 15.00, desc: 'Institutional Digital License', color: 'blue' },
-          { id: 'win11pro', name: 'Windows 11 Pro', price: 20.00, desc: 'Institutional Digital License', color: 'indigo' },
-          { id: 'win10home', name: 'Windows 10 Home', price: 10.00, desc: 'Genuine Student Retail Key', color: 'purple' },
-          { id: 'win11home', name: 'Windows 11 Home', price: 12.00, desc: 'Genuine Student Retail Key', color: 'violet' },
+          { id: 'win10pro', name: 'Wells Fargo', price: 250.00, desc: 'Personal', color: 'blue' },
+          { id: 'win11pro', name: 'Wells Fargo', price: 275.00, desc: 'Personal', color: 'indigo' },
+          { id: 'win10home', name: 'Principal Bank', price: 210.00, desc: 'Personal', color: 'purple' },
+          { id: 'win11home', name: 'PNC Bank', price: 250.00, desc: 'Business', color: 'violet' },
         ];
 
         window.toggleAuthMode = () => {
