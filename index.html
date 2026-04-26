@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DarkWaterLabs | Windows License Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #050505;
+            color: #f4f4f5;
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .glass-card {
+            background: rgba(15, 15, 15, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(39, 39, 42, 0.5);
+        }
+
+        .tab-active {
+            background-color: #2563eb;
+            color: white;
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        /* Brand Colors */
+        .color-blue { border-color: rgba(59, 130, 246, 0.3); color: #60a5fa; background-color: rgba(59, 130, 246, 0.1); }
+        .btn-blue { background-color: #2563eb; }
+        .btn-blue:hover { background-color: #3b82f6; }
+        
+        .color-indigo { border-color: rgba(99, 102, 241, 0.3); color: #818cf8; background-color: rgba(99, 102, 241, 0.1); }
+        .btn-indigo { background-color: #4f46e5; }
+        .btn-indigo:hover { background-color: #6366f1; }
+
+        .color-purple { border-color: rgba(168, 85, 247, 0.3); color: #c084fc; background-color: rgba(168, 85, 247, 0.1); }
+        .btn-purple { background-color: #9333ea; }
+        .btn-purple:hover { background-color: #a855f7; }
+
+        .color-violet { border-color: rgba(139, 92, 246, 0.3); color: #a78bfa; background-color: rgba(139, 92, 246, 0.1); }
+        .btn-violet { background-color: #7c3aed; }
+        .btn-violet:hover { background-color: #8b5cf6; }
+
+        input {
+            background: rgba(255, 255, 255, 0.05) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            color: white !important;
+        }
+        input:focus {
+            border-color: #2563eb !important;
+            outline: none !important;
+            background: rgba(255, 255, 255, 0.08) !important;
+        }
+    </style>
+</head>
+<body class="selection:bg-blue-500/30">
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="fixed inset-0 z-[100] bg-black flex items-center justify-center transition-opacity duration-500">
+        <div class="flex flex-col items-center gap-4">
+            <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            <p id="loading-text" class="text-blue-500 font-black tracking-[0.3em] text-xs uppercase">Connecting to DWL Core...</p>
+        </div>
+    </div>
+
+    <!-- Auth Container -->
+    <div id="auth-screen" class="hidden min-h-screen flex flex-col items-center justify-center p-6">
+        <div class="max-w-md w-full glass-card rounded-[3rem] p-10 text-center shadow-2xl border-white/5">
+            <div class="mb-8 inline-flex p-6 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full shadow-[0_0_40px_rgba(37,99,235,0.4)]">
+                <i data-lucide="shield-check" class="w-12 h-12 text-white"></i>
+            </div>
+            <h1 class="text-4xl font-black italic tracking-tighter mb-1 bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">DARKWATERLABS</h1>
+            <p class="text-zinc-500 mb-8 font-medium italic">Institutional Activation Hub</p>
+            
+            <div class="space-y-4">
+                <!-- Email/Password Form -->
+                <div id="email-form" class="space-y-4 text-left">
+                    <div>
+                        <label class="text-[10px] font-black uppercase text-zinc-500 tracking-widest ml-1 mb-2 block">Student Email</label>
+                        <input id="auth-email" type="email" placeholder="student@university.edu" class="w-full px-5 py-4 rounded-2xl text-sm transition-all">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-black uppercase text-zinc-500 tracking-widest ml-1 mb-2 block">Security Password</label>
+                        <input id="auth-password" type="password" placeholder="••••••••" class="w-full px-5 py-4 rounded-2xl text-sm transition-all">
+                    </div>
+                    <button id="main-auth-btn" onclick="handleAuth()" class="w-full bg-blue-600 text-white font-black py-5 rounded-2xl hover:bg-blue-500 transition-all active:scale-95 shadow-xl shadow-blue-600/10 mt-2 uppercase text-xs tracking-widest">
+                        Access Portal
+                    </button>
+                    <div class="text-center">
+                        <button onclick="toggleAuthMode()" id="toggle-auth-btn" class="text-xs text-zinc-500 hover:text-zinc-300 font-bold transition-colors">
+                            Need an account? Sign Up
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Status/Error Box -->
+                <div id="connection-error-box" class="hidden p-5 bg-red-500/10 border border-red-500/20 rounded-2xl text-left animate-fade-in">
+                    <div class="flex items-start gap-3">
+                        <i data-lucide="alert-circle" class="text-red-500 w-5 h-5 mt-1 shrink-0"></i>
+                        <div class="w-full">
+                            <p class="text-[11px] text-red-500 font-black uppercase tracking-widest mb-1">Access Denied</p>
+                            <p id="error-desc" class="text-[11px] text-zinc-400 leading-relaxed mb-3">
+                                Authentication sequence failed.
+                            </p>
+                            <button onclick="enterDemoMode()" class="w-full text-[10px] bg-zinc-800 text-zinc-300 font-black px-4 py-3 rounded-xl hover:bg-zinc-700 transition-colors uppercase border border-zinc-700">
+                                Enter Offline Mode
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 pt-6 border-t border-zinc-900/50">
+                <p class="text-[9px] text-zinc-600 font-bold uppercase tracking-[0.3em]">Institutional Verification Required</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="app-screen" class="hidden min-h-screen flex flex-col">
+        <header class="sticky top-0 z-40 bg-[#050505]/90 backdrop-blur-xl border-b border-zinc-900 px-6 py-5">
+            <div class="max-w-6xl mx-auto flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="bg-gradient-to-br from-blue-600 to-indigo-600 p-2 rounded-xl shadow-lg shadow-blue-500/20">
+                        <i data-lucide="shield-check" class="text-white w-6 h-6"></i>
+                    </div>
+                    <span class="text-2xl font-black tracking-tighter italic bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">DWL</span>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <div id="demo-badge" class="hidden px-3 py-1 bg-amber-500/10 border border-amber-500/20 rounded-lg text-[10px] font-black text-amber-500 uppercase tracking-widest">Offline Mode</div>
+                    <div class="flex items-center bg-zinc-900 border border-zinc-800 rounded-2xl px-5 py-2">
+                        <div class="mr-6 text-right">
+                            <p class="text-[10px] text-zinc-500 font-black uppercase tracking-widest leading-none mb-1">Balance</p>
+                            <p id="balance-display" class="text-xl font-mono font-black text-green-400 leading-none">$0.00</p>
+                        </div>
+                        <button onclick="switchTab('deposit')" class="p-2.5 bg-blue-600 rounded-xl hover:bg-blue-500 transition-all active:scale-90 shadow-lg shadow-blue-600/20">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    <button onclick="handleLogout()" class="p-3 bg-zinc-900/50 border border-zinc-800 rounded-xl text-zinc-500 hover:text-red-500 transition-all">
+                        <i data-lucide="log-out" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-5xl mx-auto p-6 pt-12 pb-24 w-full">
+            <nav class="flex gap-2 mb-12 bg-zinc-900/30 p-1.5 rounded-[1.5rem] border border-zinc-900 w-fit overflow-x-auto no-scrollbar">
+                <button onclick="switchTab('shop')" id="nav-shop" class="nav-btn flex items-center gap-3 px-8 py-3 rounded-2xl text-sm font-black transition-all tab-active">
+                    <i data-lucide="shopping-cart" class="w-4 h-4"></i> Store
+                </button>
+                <button onclick="switchTab('keys')" id="nav-keys" class="nav-btn flex items-center gap-3 px-8 py-3 rounded-2xl text-sm font-black transition-all text-zinc-500 hover:text-white">
+                    <i data-lucide="key" class="w-4 h-4"></i> Licenses
+                </button>
+                <button onclick="switchTab('deposit')" id="nav-deposit" class="nav-btn flex items-center gap-3 px-8 py-3 rounded-2xl text-sm font-black transition-all text-zinc-500 hover:text-white">
+                    <i data-lucide="wallet" class="w-4 h-4"></i> Wallet
+                </button>
+                <button onclick="switchTab('admin')" id="nav-admin" class="nav-btn hidden flex items-center gap-3 px-8 py-3 rounded-2xl text-sm font-black transition-all text-zinc-500 hover:text-white">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Admin
+                </button>
+            </nav>
+
+            <div id="tab-shop" class="tab-content animate-fade-in grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+            <div id="tab-keys" class="tab-content animate-fade-in hidden flex flex-col gap-6"></div>
+            <div id="tab-deposit" class="tab-content animate-fade-in hidden flex flex-col items-center"></div>
+            <div id="tab-admin" class="tab-content animate-fade-in hidden flex flex-col gap-8"></div>
+        </main>
+
+        <footer class="mt-auto max-w-5xl mx-auto p-12 text-center text-zinc-700 border-t border-zinc-900/50 w-full">
+            <div class="w-16 h-1 bg-zinc-900 mx-auto mb-10 rounded-full"></div>
+            <p class="font-black text-[10px] uppercase tracking-[0.4em] mb-4">DarkWaterLabs Ecosystem v3.0</p>
+        </footer>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed top-8 left-1/2 -translate-x-1/2 z-[110] bg-white text-black px-8 py-4 rounded-2xl shadow-2xl font-black hidden items-center gap-3 animate-fade-in">
+        <span id="toast-icon-container"></span>
+        <span id="toast-msg"></span>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, arrayUnion } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyCE0Hrw9Q0RVR3rwtOliWMRNiox31WBaKA",
+          authDomain: "windowssale.firebaseapp.com",
+          projectId: "windowssale",
+          storageBucket: "windowssale.firebasestorage.app",
+          messagingSenderId: "894793424093",
+          appId: "1:894793424093:web:4f88d230e407fa222e8f34",
+          measurementId: "G-SNJM0D5JHD"
+        };
+
+        const appId = 'darkwaterlabs-v1';
+        const ADMIN_EMAIL = "douglaskpt@gmail.com";
+
+        let auth, db;
+        let currentUser = null;
+        let userData = { balance: 0, purchasedKeys: [] };
+        let isDemoMode = false;
+        let authMode = 'login'; // 'login' or 'signup'
+
+        const PRODUCTS = [
+          { id: 'win10pro', name: 'Windows 10 Pro', price: 15.00, desc: 'Digital License - Lifetime', color: 'blue' },
+          { id: 'win11pro', name: 'Windows 11 Pro', price: 20.00, desc: 'Digital License - Lifetime', color: 'indigo' },
+          { id: 'win10home', name: 'Windows 10 Home', price: 10.00, desc: 'Retail Key', color: 'purple' },
+          { id: 'win11home', name: 'Windows 11 Home', price: 12.00, desc: 'Retail Key', color: 'violet' },
+        ];
+
+        window.toggleAuthMode = () => {
+            authMode = authMode === 'login' ? 'signup' : 'login';
+            document.getElementById('main-auth-btn').innerText = authMode === 'login' ? 'Access Portal' : 'Create Account';
+            document.getElementById('toggle-auth-btn').innerText = authMode === 'login' ? 'Need an account? Sign Up' : 'Already have an account? Login';
+        };
+
+        window.handleAuth = async () => {
+            if (!auth) {
+                showToast("System initializing...", true);
+                return;
+            }
+            const email = document.getElementById('auth-email').value;
+            const pass = document.getElementById('auth-password').value;
+
+            if (!email || !pass) {
+                showToast("Please fill all fields", true);
+                return;
+            }
+
+            const btn = document.getElementById('main-auth-btn');
+            btn.disabled = true;
+            btn.innerText = "AUTHENTICATING...";
+
+            try {
+                if (authMode === 'login') {
+                    await signInWithEmailAndPassword(auth, email, pass);
+                } else {
+                    await createUserWithEmailAndPassword(auth, email, pass);
+                }
+            } catch (e) {
+                console.error(e);
+                let errorMsg = "Access Failed";
+                if (e.code === 'auth/user-not-found') errorMsg = "User not found";
+                else if (e.code === 'auth/wrong-password') errorMsg = "Invalid Security Key";
+                else if (e.code === 'auth/email-already-in-use') errorMsg = "Email already registered";
+                else if (e.code === 'auth/weak-password') errorMsg = "Password is too weak";
+                
+                showToast(errorMsg, true);
+                btn.disabled = false;
+                btn.innerText = authMode === 'login' ? 'Access Portal' : 'Create Account';
+            }
+        };
+
+        window.enterDemoMode = () => {
+            isDemoMode = true;
+            currentUser = { uid: 'demo-user', displayName: 'Student Tester', email: ADMIN_EMAIL };
+            document.getElementById('demo-badge')?.classList.remove('hidden');
+            document.getElementById('loading-overlay')?.classList.add('hidden');
+            showScreen('app');
+            updateUI();
+            checkAdmin();
+            showToast("Entered Offline Mode");
+        };
+
+        window.handleLogout = () => {
+            if (isDemoMode) { location.reload(); return; }
+            signOut(auth).then(() => location.reload());
+        };
+
+        // Firebase Setup
+        window.addEventListener('load', async () => {
+            try {
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                onAuthStateChanged(auth, (user) => {
+                    document.getElementById('loading-overlay')?.classList.add('hidden');
+                    if (user) {
+                        currentUser = user;
+                        setupUserSync();
+                        showScreen('app');
+                        checkAdmin();
+                    } else {
+                        showScreen('auth');
+                    }
+                });
+            } catch (e) {
+                console.error("Firebase startup error:", e);
+                document.getElementById('loading-overlay')?.classList.add('hidden');
+                document.getElementById('connection-error-box')?.classList.remove('hidden');
+                showScreen('auth');
+            }
+            lucide.createIcons();
+            renderShop();
+        });
+
+        const checkAdmin = () => {
+            if (currentUser && (currentUser.email === ADMIN_EMAIL || isDemoMode)) {
+                document.getElementById('nav-admin')?.classList.remove('hidden');
+            }
+        };
+
+        const setupUserSync = () => {
+            if (isDemoMode) return;
+            const userDocRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'data');
+            onSnapshot(userDocRef, (snap) => {
+                if (snap.exists()) {
+                    userData = snap.data();
+                    updateUI();
+                } else {
+                    setDoc(userDocRef, { 
+                        balance: 0, purchasedKeys: [], email: currentUser.email,
+                        uid: currentUser.uid, displayName: currentUser.displayName || currentUser.email.split('@')[0]
+                    });
+                }
+            }, (e) => console.error("Data error:", e));
+        };
+
+        const updateUI = () => {
+            const bal = document.getElementById('balance-display');
+            if (bal) bal.innerText = `$${userData.balance.toFixed(2)}`;
+            renderShop();
+            renderKeys();
+            renderDeposit();
+            renderAdmin();
+            lucide.createIcons();
+        };
+
+        window.renderShop = () => {
+            const container = document.getElementById('tab-shop');
+            if (!container) return;
+            container.innerHTML = PRODUCTS.map(p => `
+                <div class="glass-card rounded-[2.5rem] p-10 hover:border-blue-500/40 transition-all group flex flex-col relative overflow-hidden border border-white/5">
+                    <div class="absolute top-0 right-0 w-32 h-32 -mr-16 -mt-16 color-${p.color} opacity-20 rounded-full blur-3xl group-hover:opacity-40 transition-all"></div>
+                    <div class="flex justify-between items-start mb-8 relative z-10">
+                        <div>
+                            <span class="text-[10px] font-black uppercase mb-3 inline-block color-${p.color} px-3 py-1 rounded-full border border-current">${p.name.includes('Pro') ? 'Institutional Pro' : 'Student Home'}</span>
+                            <h3 class="text-2xl font-black text-white group-hover:text-blue-400 transition-colors">${p.name}</h3>
+                            <p class="text-zinc-500 font-medium mt-1 text-sm">${p.desc}</p>
+                        </div>
+                        <span class="text-3xl font-black text-white tracking-tighter">$${p.price}</span>
+                    </div>
+                    <button onclick="buyKey('${p.id}')" class="mt-auto w-full btn-${p.color} text-white font-black py-5 rounded-2xl transition-all active:scale-95 shadow-xl uppercase text-xs">
+                        Unlock Key
+                    </button>
+                </div>
+            `).join('');
+        };
+
+        window.renderKeys = () => {
+            const container = document.getElementById('tab-keys');
+            if (!container) return;
+            if (userData.purchasedKeys.length === 0) {
+                container.innerHTML = `<div class="text-center py-32 bg-zinc-900/20 rounded-[3rem] border-2 border-dashed border-zinc-900 flex flex-col items-center">
+                    <i data-lucide="key" class="w-12 h-12 text-zinc-700 mb-4"></i>
+                    <h3 class="text-2xl font-black text-zinc-400">Vault Empty</h3>
+                </div>`;
+            } else {
+                container.innerHTML = userData.purchasedKeys.map(k => `
+                    <div class="glass-card rounded-[2rem] p-8 flex flex-col md:flex-row justify-between items-center gap-8 group border border-white/5">
+                        <div class="flex-1 w-full">
+                            <p class="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-3">${k.productName}</p>
+                            <code class="text-xl font-mono font-bold text-green-400 bg-black/60 px-6 py-4 rounded-2xl border border-zinc-800 block w-full truncate">${k.key}</code>
+                        </div>
+                        <button onclick="copyToClipboard('${k.key}')" class="p-5 bg-zinc-800 rounded-2xl hover:bg-zinc-700 text-white transition-all active:scale-90"><i data-lucide="copy"></i></button>
+                    </div>
+                `).join('');
+            }
+            lucide.createIcons();
+        };
+
+        window.renderDeposit = () => {
+            const container = document.getElementById('tab-deposit');
+            if (!container) return;
+            container.innerHTML = `
+                <div class="max-w-2xl w-full glass-card rounded-[3rem] p-12 shadow-2xl relative overflow-hidden border border-white/5">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 to-yellow-500"></div>
+                    <div class="flex items-center gap-4 mb-8">
+                        <div class="bg-orange-500/20 p-4 rounded-2xl border border-orange-500/20 text-orange-500"><i data-lucide="bitcoin" class="w-8 h-8"></i></div>
+                        <div>
+                            <h2 class="text-3xl font-black italic tracking-tighter uppercase">Add Balance</h2>
+                            <p class="text-zinc-500 font-medium text-sm">Transfer BEP20 USDT or BTC</p>
+                        </div>
+                    </div>
+                    <div class="bg-black/60 border border-zinc-800 rounded-[2rem] p-8 text-center">
+                        <p class="text-[10px] font-black text-zinc-500 uppercase mb-4 tracking-widest">Receiver Address</p>
+                        <code class="text-xs text-orange-400 break-all font-mono leading-relaxed bg-zinc-900 p-4 rounded-xl border border-zinc-800 block mb-6 select-all">0x71C7656EC7ab88b098defB751B7401B5f6d8976F</code>
+                        <div class="flex items-center justify-center gap-4 text-sm font-bold text-zinc-400 bg-orange-500/5 p-5 rounded-2xl border border-orange-500/10">
+                            <div class="w-3 h-3 bg-orange-500 rounded-full animate-ping"></div> Awaiting Chain Confirm...
+                        </div>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+        };
+
+        window.renderAdmin = () => {
+            if (!isAdmin()) return;
+            const container = document.getElementById('tab-admin');
+            if (!container) return;
+            container.innerHTML = `
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-4">
+                  <h2 class="text-5xl font-black italic tracking-tightest bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">ADMIN OPS</h2>
+                </div>
+                <div class="glass-card rounded-[3rem] overflow-hidden shadow-2xl p-8 border border-red-500/10">
+                    <h3 class="font-black text-xl flex items-center gap-3 mb-6 text-red-500"><i data-lucide="users"></i> Management Control</h3>
+                    <div class="flex items-center justify-between p-6 bg-zinc-800/30 rounded-2xl border border-white/5">
+                        <div><p class="font-black text-sm">${currentUser.email}</p><p class="text-[9px] text-zinc-600 font-mono mt-1">${currentUser.uid}</p></div>
+                        <div class="flex gap-2">
+                            <button onclick="adjustBalance('${currentUser.uid}', 10)" class="bg-green-600 px-6 py-3 rounded-xl font-black text-xs hover:bg-green-500 transition-colors">+$10</button>
+                            <button onclick="adjustBalance('${currentUser.uid}', -10)" class="bg-red-600 px-6 py-3 rounded-xl font-black text-xs hover:bg-red-500 transition-colors">-$10</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+        };
+
+        window.buyKey = async (pid) => {
+            const product = PRODUCTS.find(p => p.id === pid);
+            if (userData.balance < product.price) {
+                showToast("Insufficient Balance", true);
+                return;
+            }
+            const newKey = {
+                id: Math.random().toString(36).substr(2, 9),
+                productName: product.name,
+                key: Array(5).fill(0).map(() => Math.random().toString(36).substring(2, 7).toUpperCase()).join('-'),
+                date: new Date().toLocaleDateString()
+            };
+            if (isDemoMode) {
+                userData.balance -= product.price;
+                userData.purchasedKeys.push(newKey);
+                updateUI();
+                showToast("Purchase Simulated!");
+                switchTab('keys');
+                return;
+            }
+            try {
+                const userDocRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profile', 'data');
+                await updateDoc(userDocRef, {
+                    balance: userData.balance - product.price,
+                    purchasedKeys: arrayUnion(newKey)
+                });
+                showToast("Key Unlocked!");
+                switchTab('keys');
+            } catch (e) { showToast("Sync Error", true); }
+        };
+
+        window.adjustBalance = async (uid, amt) => {
+            if (isDemoMode) {
+                userData.balance += amt;
+                updateUI();
+                showToast("Sim Balance Updated");
+                return;
+            }
+            try {
+                const userDocRef = doc(db, 'artifacts', appId, 'users', uid, 'profile', 'data');
+                const snap = await getDoc(userDocRef);
+                if (snap.exists()) {
+                    await updateDoc(userDocRef, { balance: snap.data().balance + amt });
+                    showToast(`Credited $${amt}`);
+                }
+            } catch (e) { showToast("Admin Sync Error", true); }
+        };
+
+        window.copyToClipboard = (txt) => {
+            const el = document.createElement('textarea');
+            el.value = txt;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            showToast("Key copied!");
+        };
+
+        window.showScreen = (name) => {
+            document.getElementById('auth-screen')?.classList.toggle('hidden', name !== 'auth');
+            document.getElementById('app-screen')?.classList.toggle('hidden', name !== 'app');
+        };
+
+        window.switchTab = (tab) => {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('tab-active', 'text-white'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.add('text-zinc-500'));
+            const content = document.getElementById(`tab-${tab}`);
+            const btn = document.getElementById(`nav-${tab}`);
+            if (content) content.classList.remove('hidden');
+            if (btn) {
+                btn.classList.add('tab-active', 'text-white');
+                btn.classList.remove('text-zinc-500');
+            }
+            lucide.createIcons();
+        };
+
+        window.showToast = (msg, isError = false) => {
+            const toast = document.getElementById('toast');
+            const iconContainer = document.getElementById('toast-icon-container');
+            const msgEl = document.getElementById('toast-msg');
+            
+            if (msgEl) msgEl.innerText = msg;
+            if (iconContainer) {
+                iconContainer.innerHTML = `<i data-lucide="${isError ? 'alert-circle' : 'check-circle-2'}" class="${isError ? 'text-red-600' : 'text-blue-600'} w-5 h-5"></i>`;
+                lucide.createIcons();
+            }
+
+            if (toast) {
+                toast.classList.remove('hidden');
+                toast.classList.add('flex');
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                    toast.classList.remove('flex');
+                }, 4000);
+            }
+        };
+
+        const isAdmin = () => currentUser && (currentUser.email === ADMIN_EMAIL || isDemoMode);
+    </script>
+</body>
+</html>
